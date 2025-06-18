@@ -10,6 +10,34 @@
   <meta name="theme-color" content="#115ac9" />
   <style>
     body { margin:0; font-family:Manrope,sans-serif; }
+ .install-guide {
+  bottom: 20px;
+  left: 12px;    /* add a little breathing room */
+  right: 12px;
+  padding: 20px; /* more padding */
+  font-size: 15px; 
+}
+
+      #installBtn {
+    display: none;               /* still hidden until we need it */
+    position: fixed;
+    bottom: 20px;
+    left: 20px;                  /* span almost the entire width */
+    right: 20px;
+    background: #115ac9;
+    color: #fff;
+    padding: 16px;               /* bigger tap area */
+    font-size: 18px;             /* larger text */
+    border: none;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1000;
+  }
+
+.install-guide h4 {
+  font-size: 18px;
+}
+
     /* your existing funnel CSS goes here */
   </style>
 </head>
