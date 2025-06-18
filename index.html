@@ -11,6 +11,8 @@
   <!-- PWA manifest -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#115ac9" />
+  
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     /* Base & Layout */
@@ -22,67 +24,65 @@
       font-family: 'Manrope', sans-serif;
       background: #115ac9;
     }
+    
     .ghl-container {
       display: flex;
       flex-direction: column;
       height: 100vh;
-    }
-    .header-section {
-      flex: 0 0 auto;
-      text-align: center;
-      padding: 20px 10px 10px;
-    }
-    .logo-img {
-      max-width: 200px;
-      width: 80%;
-      height: auto;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      padding: 10px;
     }
 
-    /* Crop out the embedded header */
-  /* ← Updated cropping CSS ↓ */
-  .iframe-wrapper {
-  position: relative;
-  overflow: hidden;
-  padding-top: 60px;   /* height of the white bar */
-  border-radius: 12px;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(5px);
-}
+    .iframe-container {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 8px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      position: relative;
+    }
+
+    /* Fixed header overlay - consistent values */
+    .iframe-wrapper {
+      position: relative;
+      overflow: hidden;
+      padding-top: 70px;   /* height to hide the ugly header */
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      height: 100%;
+    }
 
     .overlay-bar {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 60px;        /* same as padding-top */
-  background: white;
-  z-index: 20;
-}
+      position: absolute;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      height: 70px;        /* same as padding-top */
+      background: white;
+      z-index: 20;
+      border-radius: 12px 12px 0 0;
+    }
 
     .overlay-logo {
-  position: absolute;
-  top: 12px;           /* adjust to center your logo vertically in the bar */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;        /* change if you want it larger or smaller */
-  height: auto;
-  z-index: 21;
-  pointer-events: none;
-}
-    .iframe-wrapper iframe {
-  position: relative;
-  top: -60px;          /* hide the iframe’s own header */
-  width: 100%;
-  height: calc(100% + 60px);
-  border: none;
-  border-radius: 12px;
-}
-
+      position: absolute;
+      top: 15px;           /* center vertically in the 70px bar */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140px;        
+      height: auto;
+      z-index: 21;
+      pointer-events: none;
+    }
+    
     #ALCOAC23CTTN {
-      width: 100%;
-      height: calc(100% + 40px); /* extend to cover the crop */
       position: relative;
-      top: -40px;           /* shift up to hide its own header */
+      top: -70px;          /* shift up to hide iframe's header (same as padding) */
+      width: 100%;
+      height: calc(100% + 70px); /* extend to cover the hidden area */
       border: none;
       border-radius: 12px;
       background: white;
@@ -91,14 +91,20 @@
     /* Loading overlay */
     .loading-overlay {
       position: absolute;
-      top:0;left:0;right:0;bottom:0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(255,255,255,0.1);
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 12px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
       z-index: 10;
     }
+    
     .loading-spinner {
       width: 40px;
       height: 40px;
@@ -107,102 +113,186 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+    
+    /* Hide loading overlay after iframe loads */
+    .iframe-loaded .loading-overlay {
+      display: none;
+    }
 
-    /* Install button */
+    /* Install button - only for iOS */
     #installBtn {
       display: none;
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       left: 20px;
       right: 20px;
-      background: #115ac9;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.95);
+      color: #115ac9;
       padding: 16px;
-      font-size: 18px;
-      border: none;
-      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 2px solid #115ac9;
+      border-radius: 12px;
       text-align: center;
       z-index: 1000;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
     /* iOS Install Modal */
     #iosInstallModal {
       display: none;
       position: fixed;
-      top:0;left:0;right:0;bottom:0;
-      background: rgba(0,0,0,0.6);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
       align-items: center;
       justify-content: center;
       z-index: 1001;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
-    #iosInstallModal.active { display: flex; }
+    
+    #iosInstallModal.active { 
+      display: flex; 
+    }
+    
     #iosInstallModal .modal-content {
       background: #fff;
       padding: 24px;
       width: 90%;
       max-width: 320px;
-      border-radius: 12px;
+      border-radius: 16px;
       text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
+    
     #iosInstallModal h2 {
-      margin-bottom: 12px;
+      margin: 0 0 16px 0;
       color: #115ac9;
       font-size: 20px;
+      font-weight: 600;
     }
-    #iosInstallModal svg {
+    
+    #iosInstallModal .share-icon {
       width: 48px;
       height: 48px;
-      margin: 12px 0;
+      margin: 12px auto;
       color: #115ac9;
+      display: block;
     }
+    
     #iosInstallModal ol {
       text-align: left;
       padding-left: 20px;
-      margin: 12px 0;
+      margin: 16px 0;
       font-size: 15px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
+    
+    #iosInstallModal ol li {
+      margin-bottom: 8px;
+    }
+    
     #iosInstallModal button#closeModal {
-      background: transparent;
-      border: 2px solid #115ac9;
-      color: #115ac9;
-      padding: 10px 16px;
+      background: #115ac9;
+      border: none;
+      color: white;
+      padding: 12px 24px;
       border-radius: 8px;
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 8px;
+      margin-top: 12px;
     }
 
-    /* Funnel CSS goes here */
+    /* Mobile optimizations */
+    @media screen and (max-width: 480px) {
+      .ghl-container {
+        padding: 5px;
+      }
+      
+      .overlay-logo {
+        width: 120px;
+        top: 12px;
+      }
+      
+      .iframe-wrapper {
+        padding-top: 60px;
+      }
+      
+      .overlay-bar {
+        height: 60px;
+      }
+      
+      #ALCOAC23CTTN {
+        top: -60px;
+        height: calc(100% + 60px);
+      }
+    }
+
+    /* Extra small screens */
+    @media screen and (max-width: 360px) {
+      .overlay-logo {
+        width: 100px;
+        top: 10px;
+      }
+      
+      .iframe-wrapper {
+        padding-top: 50px;
+      }
+      
+      .overlay-bar {
+        height: 50px;
+      }
+      
+      #ALCOAC23CTTN {
+        top: -50px;
+        height: calc(100% + 50px);
+      }
+    }
+
+    /* Landscape orientation */
+    @media screen and (max-height: 500px) and (orientation: landscape) {
+      .ghl-container {
+        padding: 5px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Install App button (shown to iOS) -->
-  <button id="installBtn">Install App</button>
+  <!-- Install App button (only shown to iOS users who haven't installed) -->
+  <button id="installBtn">📱 Add to Home Screen</button>
 
   <div class="ghl-container">
-    <div class="header-section">
-      <img src="https://assets.cdn.filesafe.space/QOxAQzWYPxtKuZsAaWqa/media/67fd6c7ec7a015b737d91dcc.png"
-           alt="AlCoa Chiropractic Logo"
-           class="logo-img">
-    </div>
     <div class="iframe-container">
       <div class="iframe-wrapper">
-          <div class="overlay-bar"></div>
+        <!-- White overlay bar to hide the ugly header -->
+        <div class="overlay-bar"></div>
+        
+        <!-- Your logo overlay -->
+        <img src="https://assets.cdn.filesafe.space/QOxAQzWYPxtKuZsAaWqa/media/67fd6c7ec7a015b737d91dcc.png"
+             alt="AlCoa Logo"
+             class="overlay-logo" />
 
-          <img
-    src="https://raw.githubusercontent.com/sofiardrgz/booking/cbc1e50a61db7b745b5d0a8f4c5ad0d78efb6aec/logo.png"
-    alt="AlCoa Logo"
-    class="overlay-logo"
-  />
-
+        <!-- Loading spinner -->
         <div class="loading-overlay">
           <div class="loading-spinner"></div>
         </div>
+        
+        <!-- Booking form iframe -->
         <iframe id="ALCOAC23CTTN"
                 src="https://clinic.patienthealthcenters.org/embedded/book?clinic=ALCOAC23CTTN"
-                frameborder="0" scrolling="auto">
+                frameborder="0" 
+                scrolling="auto">
         </iframe>
       </div>
     </div>
@@ -211,64 +301,158 @@
   <!-- iOS install guide modal -->
   <div id="iosInstallModal">
     <div class="modal-content">
-      <h2>Save to Home Screen</h2>
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+      <h2>📱 Add to Home Screen</h2>
+      
+      <!-- Share icon SVG -->
+      <svg class="share-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25
-                 2.25v9a2.25 2.25 0 0 0 2.25
-                 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25
-                 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0
-                 0-3 3m3-3V15" />
+              d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3V15" />
       </svg>
+      
       <ol>
-        <li>Tap the share icon above.</li>
-        <li>Choose “Add to Home Screen.”</li>
-        <li>Tap “Add” in the top-right.</li>
+        <li>Tap the <strong>Share</strong> button at the bottom of Safari</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+        <li>Tap <strong>"Add"</strong> to install the app</li>
       </ol>
-      <button id="closeModal">Got it</button>
+      
+      <button id="closeModal">Got it!</button>
     </div>
   </div>
 
   <script>
     // Service worker for PWA
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.log('Service worker registration failed:', err);
+      });
     }
 
-    // Prefill iframe via URL params
+    // Configure iframe with URL parameters
     function configure() {
       const iframe = document.getElementById("ALCOAC23CTTN");
+      
       function appendQueryParams(url, params) {
-        const u = new URL(url);
-        Object.keys(params).forEach(k => params[k] && u.searchParams.append(k, params[k]));
-        return u.toString();
+        const urlObj = new URL(url);
+        const searchParams = new URLSearchParams(urlObj.search);
+        for (const key in params) {
+          if (!params.hasOwnProperty(key)) continue;
+          searchParams.append(key, params[key]);
+        }
+        urlObj.search = searchParams.toString();
+        return urlObj.toString();
       }
+      
       function getParamsFromURL() {
-        const search = new URLSearchParams(window.location.search);
-        return ['first_name','last_name','email','phone','birth_date']
-          .reduce((o,k) => (search.has(k) && (o[k]=search.get(k)), o), {});
+        const searchParams = new URLSearchParams(window.location.search);
+        const params = {};
+        const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
+        for (const key of keys) {
+          if (!searchParams.has(key)) continue;
+          params[key] = searchParams.get(key);
+        }
+        return params;
       }
-      iframe.src = appendQueryParams(iframe.src, getParamsFromURL());
+      
+      const params = getParamsFromURL();
+      iframe.src = appendQueryParams(iframe.src, params);
+      
+      // Handle iframe loading
+      let loadingHidden = false;
+      
+      function hideLoader() {
+        if (!loadingHidden) {
+          document.querySelector('.iframe-container').classList.add('iframe-loaded');
+          loadingHidden = true;
+        }
+      }
+      
+      iframe.onload = function() {
+        hideLoader();
+      };
+      
+      // Fallback timeout
+      setTimeout(hideLoader, 3000);
     }
-    if (document.readyState === 'complete') configure();
-    else window.addEventListener('load', configure);
 
-    // Show Install App button + modal on iOS only
-    window.addEventListener('load', ()=>{
+    // Fixed iOS install detection and modal handling
+    function handleIOSInstall() {
       const ua = navigator.userAgent.toLowerCase();
-      const isIOS = /iphone|ipad|ipod/.test(ua);
-      const isStandalone = window.navigator.standalone;
+      const isIOS = /iphone|ipad|ipod/.test(ua) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      // Check if app is running in standalone mode (already installed)
+      const isStandalone = window.navigator.standalone || 
+                          window.matchMedia('(display-mode: standalone)').matches;
+      
       if (isIOS && !isStandalone) {
-        const btn   = document.getElementById('installBtn');
+        const btn = document.getElementById('installBtn');
         const modal = document.getElementById('iosInstallModal');
-        const close = document.getElementById('closeModal');
+        const closeBtn = document.getElementById('closeModal');
 
+        // Show install button
         btn.style.display = 'block';
-        btn.onclick = () => modal.classList.add('active');
-        close.onclick = () => modal.classList.remove('active');
+        
+        // Button click handler
+        btn.onclick = function() {
+          modal.classList.add('active');
+        };
+        
+        // Close button handler
+        closeBtn.onclick = function() {
+          modal.classList.remove('active');
+        };
+        
+        // Close modal when clicking outside
+        modal.onclick = function(e) {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+          }
+        };
+        
+        // Auto-show modal after a delay (optional)
+        setTimeout(() => {
+          if (!sessionStorage.getItem('installPromptShown')) {
+            modal.classList.add('active');
+            sessionStorage.setItem('installPromptShown', 'true');
+          }
+        }, 5000);
+      }
+    }
+
+    // Initialize everything when page loads
+    if (document.readyState === 'complete') {
+      configure();
+      handleIOSInstall();
+    } else {
+      window.addEventListener('load', function() {
+        configure();
+        handleIOSInstall();
+      });
+    }
+
+    // Handle display mode changes (when app gets installed)
+    window.addEventListener('appinstalled', function() {
+      // Hide install elements when app is installed
+      document.getElementById('installBtn').style.display = 'none';
+      document.getElementById('iosInstallModal').classList.remove('active');
+    });
+
+    // Prevent zoom on iOS
+    document.addEventListener('touchstart', function(event) {
+      if (event.touches.length > 1) {
+        event.preventDefault();
       }
     });
+
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
   </script>
 </body>
 </html>
