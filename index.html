@@ -40,14 +40,23 @@
     }
 
     /* Crop out the embedded header */
+  /* ← Updated cropping CSS ↓ */
     .iframe-wrapper {
-      height: 100%;
-      border-radius: 12px;
+      position: relative;
       overflow: hidden;
+      padding-top: 40px;
+      border-radius: 12px;
       background: rgba(255,255,255,0.05);
       backdrop-filter: blur(5px);
+    }
+    .iframe-wrapper iframe {
       position: relative;
-      padding-top: 40px;    /* lift content down */
+      top: -40px;
+      width: 100%;
+      height: calc(100% + 40px);
+      border: none;
+      border-radius: 12px;
+      background: white;
     }
     #ALCOAC23CTTN {
       width: 100%;
