@@ -3,67 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="/icons/icon-192.png" type="image/png">
   <title>Alcoa Chiropractic & Wellness Center Booking App</title>
-  <!-- link to manifest -->
+
+  <!-- favicon -->
+  <link rel="icon" href="/icons/icon-192.png" type="image/png">
+
+  <!-- PWA manifest -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#115ac9" />
+
   <style>
-    body { margin:0; font-family:Manrope,sans-serif; }
- .install-guide {
-  bottom: 20px;
-  left: 12px;    /* add a little breathing room */
-  right: 12px;
-  padding: 20px; /* more padding */
-  font-size: 15px; 
-}
+    /* Base & Layout */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Manrope', sans-serif;
+      background: #115ac9;
+    }
+    .ghl-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header-section {
+      flex: 0 0 auto;
+      text-align: center;
+      padding: 20px 10px 10px;
+    }
+    .logo-img {
+      max-width: 200px;
+      width: 80%;
+      height: auto;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+    .iframe-container {
+      flex: 1 1 auto;
+      overflow: hidden;
+      padding: 0 10px 10px;
+    }
+    .iframe-wrapper {
+      height: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(5px);
+      position: relative;
+    }
+    #ALCOAC23CTTN {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px;
+      background: white;
+    }
+    .loading-overlay {
+      position: absolute;
+      top:0;left:0;right:0;bottom:0;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      z-index: 10;
+    }
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
 
-      #installBtn {
-    display: none;               /* still hidden until we need it */
-    position: fixed;
-    bottom: 20px;
-    left: 20px;                  /* span almost the entire width */
-    right: 20px;
-    background: #115ac9;
-    color: #fff;
-    padding: 16px;               /* bigger tap area */
-    font-size: 18px;             /* larger text */
-    border: none;
-    border-radius: 8px;
-    text-align: center;
-    z-index: 1000;
-  }
+    /* Install button */
+    #installBtn {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      background: #115ac9;
+      color: #fff;
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      text-align: center;
+      z-index: 1000;
+    }
 
-.install-guide h4 {
-  font-size: 18px;
-}
+    /* iOS Install Modal */
+    #iosInstallModal {
+      display: none;
+      position: fixed;
+      top:0;left:0;right:0;bottom:0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+    #iosInstallModal .modal-content {
+      background: #fff;
+      padding: 24px;
+      width: 90%;
+      max-width: 320px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    #iosInstallModal h2 {
+      margin-bottom: 12px;
+      color: #115ac9;
+      font-size: 20px;
+    }
+    #iosInstallModal svg {
+      width: 48px;
+      height: 48px;
+      margin: 12px 0;
+      color: #115ac9;
+    }
+    #iosInstallModal ol {
+      text-align: left;
+      padding-left: 20px;
+      margin: 12px 0;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    #iosInstallModal button#closeModal {
+      background: transparent;
+      border: 2px solid #115ac9;
+      color: #115ac9;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
 
-    /* your existing funnel CSS goes here */
+    /* Funnel CSS goes here */
   </style>
 </head>
 <body>
-  <!-- Install button for iOS -->
-  <button id="installBtn" style="display:none;
-      position:fixed;bottom:20px;right:20px;
-      background:#115ac9;color:#fff;padding:10px;
-      border:none;border-radius:6px;z-index:1000;">
-    Install App
-  </button>
+  <!-- Install App button (shown to iOS) -->
+  <button id="installBtn">Install App</button>
 
-  <!-- iOS install modal -->
-  <div id="iosInstallModal" style="display:none;
-      position:fixed;top:0;left:0;right:0;bottom:0;
-      background:rgba(0,0,0,0.6);align-items:center;
-      justify-content:center;z-index:1001;">
-    <div style="background:#fff;padding:20px;
-        max-width:320px;margin:0 auto;border-radius:8px;
-        text-align:center;">
+  <div class="ghl-container">
+    <div class="header-section">
+      <img src="https://assets.cdn.filesafe.space/QOxAQzWYPxtKuZsAaWqa/media/67fd6c7ec7a015b737d91dcc.png"
+           alt="AlCoa Chiropractic Logo"
+           class="logo-img">
+    </div>
+    <div class="iframe-container">
+      <div class="iframe-wrapper">
+        <div class="loading-overlay">
+          <div class="loading-spinner"></div>
+        </div>
+        <iframe id="ALCOAC23CTTN"
+                src="https://clinic.patienthealthcenters.org/embedded/book?clinic=ALCOAC23CTTN"
+                frameborder="0" scrolling="auto">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS install guide modal -->
+  <div id="iosInstallModal">
+    <div class="modal-content">
       <h2>Save to Home Screen</h2>
-      <!-- your SVG share icon -->
       <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-           viewBox="0 0 24 24" stroke-width="1.5"
-           stroke="currentColor" style="width:40px;height:40px;
-           margin:12px 0;color:#115ac9;">
+           viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25
                  2.25v9a2.25 2.25 0 0 0 2.25
@@ -71,48 +184,54 @@
                  2.25 0 0 0-2.25-2.25H15m0-3-3-3m0
                  0-3 3m3-3V15" />
       </svg>
-      <ol style="text-align:left;padding-left:18px;
-           margin:12px 0;font-size:14px;">
+      <ol>
         <li>Tap the share icon above.</li>
         <li>Choose “Add to Home Screen.”</li>
         <li>Tap “Add” in the top-right.</li>
       </ol>
-      <button id="closeModal" style="background:transparent;
-          border:1px solid #115ac9;color:#115ac9;
-          padding:8px 12px;border-radius:6px;">
-        Got it
-      </button>
+      <button id="closeModal">Got it</button>
     </div>
   </div>
 
-  <!-- Your booking iframe and other page content -->
-  <div style="padding:10px;">
-    <iframe id="bookingFrame"
-            src="https://clinic.patienthealthcenters.org/embedded/book?clinic=ALCOAC23CTTN"
-            style="width:100%;height:80vh;border:none;border-radius:12px;">
-    </iframe>
-  </div>
-
   <script>
-    // PWA service worker register
+    // Service worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
 
-    // show install UI on iOS
-    const ua = navigator.userAgent.toLowerCase();
-    const isIOS = /iphone|ipad|ipod/.test(ua);
-    const isStandalone = window.navigator.standalone;
-    if (isIOS && !isStandalone) {
-      const btn = document.getElementById('installBtn');
-      btn.style.display = 'block';
-      btn.onclick = () => {
-        document.getElementById('iosInstallModal').style.display = 'flex';
-      };
-      document.getElementById('closeModal').onclick = () => {
-        document.getElementById('iosInstallModal').style.display = 'none';
-      };
+    // Prefill iframe via URL params
+    function configure() {
+      const iframe = document.getElementById("ALCOAC23CTTN");
+      function appendQueryParams(url, params) {
+        const u = new URL(url);
+        Object.keys(params).forEach(k => params[k] && u.searchParams.append(k, params[k]));
+        return u.toString();
+      }
+      function getParamsFromURL() {
+        const search = new URLSearchParams(window.location.search);
+        return ['first_name','last_name','email','phone','birth_date']
+          .reduce((o,k) => (search.has(k) && (o[k]=search.get(k)), o), {});
+      }
+      iframe.src = appendQueryParams(iframe.src, getParamsFromURL());
     }
+    if (document.readyState === 'complete') configure();
+    else window.addEventListener('load', configure);
+
+    // Show Install App button + modal on iOS only
+    window.addEventListener('load', ()=>{
+      const ua = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+      const isStandalone = window.navigator.standalone;
+      if (isIOS && !isStandalone) {
+        document.getElementById('installBtn').style.display = 'block';
+        document.getElementById('installBtn').onclick = ()=> {
+          document.getElementById('iosInstallModal').style.display = 'flex';
+        };
+        document.getElementById('closeModal').onclick = ()=> {
+          document.getElementById('iosInstallModal').style.display = 'none';
+        };
+      }
+    });
   </script>
 </body>
 </html>
