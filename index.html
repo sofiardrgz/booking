@@ -230,7 +230,19 @@
     }
     
     #iosInstallModal ol li {
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    
+    #iosInstallModal .instruction-image {
+      width: 100%;
+      max-width: 280px;
+      height: 200px;        /* Set fixed height */
+      object-fit: cover;    /* Crop to fit */
+      object-position: center top; /* Focus on top part of image */
+      border-radius: 8px;
+      margin: 8px 0 12px 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: 1px solid #e0e0e0;
     }
     
     #iosInstallModal button#closeModal {
@@ -344,8 +356,16 @@
       
       <ol>
         <li>Tap the <strong>Share</strong> button at the bottom of Safari</li>
-        <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-        <li>Tap <strong>"Add"</strong> to install the app</li>
+        <li>Scroll down and tap <strong>"Add to Home Screen"</strong>
+          <br><img src="https://storage.googleapis.com/msgsndr/QOxAQzWYPxtKuZsAaWqa/media/6853313c18ed2505bdd82e79.jpeg" 
+                   alt="Add to Home Screen step" 
+                   class="instruction-image">
+        </li>
+        <li>Tap <strong>"Add"</strong> to install the app
+          <br><img src="https://storage.googleapis.com/msgsndr/QOxAQzWYPxtKuZsAaWqa/media/6853309f54ee402392bbd3c6.jpeg" 
+                   alt="Tap Add to install" 
+                   class="instruction-image">
+        </li>
       </ol>
       
       <button id="closeModal">Got it!</button>
