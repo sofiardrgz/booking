@@ -15,7 +15,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "https://raw.githubusercontent.com/sofiardrgz/booking/refs/heads/main/icon-152.png",
       "sizes": "512x512",
       "type": "image/png"
     }
