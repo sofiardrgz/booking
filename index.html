@@ -719,12 +719,6 @@
       });
     }
 
-    // Handle display mode changes (when app gets installed)
-    window.addEventListener('appinstalled', function() {
-      // Hide install elements when app is installed
-      document.getElementById('installBtn').style.display = 'none';
-      document.getElementById('iosInstallModal').classList.remove('active');
-    });
 
     // Prevent zoom on iOS
     document.addEventListener('touchstart', function(event) {
