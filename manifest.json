@@ -9,7 +9,7 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "https://raw.githubusercontent.com/sofiardrgz/booking/refs/heads/main/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
