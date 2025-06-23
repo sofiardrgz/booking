@@ -478,7 +478,7 @@
     </div>
   </div>
 
-  <script>
+ <script>
     // Service worker for PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(err => {
@@ -617,6 +617,59 @@
         }, 5000);
       }
     }
+
+    // *** ADD THE ANDROID INSTALL CODE HERE ***
+    // Android PWA install handling
+    let deferredPrompt;
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('beforeinstallprompt fired');
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      deferredPrompt = e;
+      
+      // Show Android install button
+      const androidBtn = document.getElementById('androidInstallBtn');
+      if (androidBtn) {
+        androidBtn.style.display = 'block';
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+          if (androidBtn.style.display === 'block') {
+            androidBtn.style.display = 'none';
+          }
+        }, 10000);
+      }
+    });
+
+    // Handle Android install button click
+    document.getElementById('androidInstallBtn').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        // Show the install prompt
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        
+        // Clear the deferredPrompt so it can only be used once
+        deferredPrompt = null;
+        
+        // Hide the install button
+        document.getElementById('androidInstallBtn').style.display = 'none';
+      }
+    });
+
+    // Handle successful installation
+    window.addEventListener('appinstalled', (evt) => {
+      console.log('App was installed');
+      // Hide all install buttons
+      document.getElementById('androidInstallBtn').style.display = 'none';
+      document.getElementById('installBtn').style.display = 'none';
+    });
+    // *** END OF ANDROID INSTALL CODE ***
 
     // Initialize everything when page loads
     if (document.readyState === 'complete') {
