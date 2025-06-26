@@ -16,399 +16,525 @@
 
   <style>
     /* Base & Layout - improved mobile height handling */
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: 'Manrope', sans-serif;
-      background: #115ac9;
-      /* Fix iOS viewport issues */
-      -webkit-overflow-scrolling: touch;
-    }
+ html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  /* ✅ FIXED: Enable scrolling */
+  overflow: auto !important;
+  overflow-x: hidden;
+  padding-bottom: 120px;
+  font-family: 'Manrope', sans-serif;
+  background: #115ac9;
+  /* Fix iOS viewport issues */
+  -webkit-overflow-scrolling: touch;
+}
     
-    .ghl-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      height: calc(var(--vh, 1vh) * 100); /* Use dynamic viewport height */
-      padding: 10px;
-      box-sizing: border-box;
-    }
+   .ghl-container {
+  display: flex;
+  flex-direction: column;
+  /* ✅ FIXED: Use min-height instead of fixed height */
+  min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100);
+  padding: 10px;
+  box-sizing: border-box;
+  /* ✅ FIXED: Add bottom padding for scrolling space */
+  padding-bottom: 140px;
+}
 
-    .iframe-container {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      padding: 8px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      position: relative;
-      /* Prevent wobbling */
-      transform: translateZ(0);
-      -webkit-transform: translateZ(0);
-      will-change: auto;
-      /* Ensure minimum height */
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
 
-    /* Fixed header overlay - better height management */
-    .iframe-wrapper {
-      position: relative;
-      overflow: hidden;
-      padding-top: 80px;   /* Increased to hide header better */
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      height: 100%;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+  .iframe-container {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 8px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  position: relative;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: auto;
+  /* ✅ FIXED: Use min-height and add margin for scrolling */
+  min-height: calc(100vh - 160px);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 120px;
+}
 
-    .overlay-bar {
-      position: absolute;
-      top: 0; 
-      left: 0;
-      width: 100%;
-      height: 80px;        /* Same as padding-top */
-      background: white;
-      z-index: 20;
-      border-radius: 12px 12px 0 0;
-    }
 
-    .overlay-logo {
-      position: absolute;
-      top: 20px;           /* Center in the 80px bar */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 160px;        
-      height: auto;
-      z-index: 21;
-      pointer-events: none;
-    }
-    
-    #ALCOAC23CTTN {
-      position: relative;
-      top: -80px;          /* Match the padding-top exactly */
-      width: 100%;
-      height: calc(100vh - 120px); /* Better height calculation */
-      min-height: 600px;   /* Ensure minimum usable height */
-      border: none;
-      border-radius: 0;    /* Remove border radius to prevent gaps */
-      background: white;
-      margin: 0;           /* Remove any margins */
-      padding: 0;          /* Remove any padding */
-      flex: 1;
-    }
+ /* Fixed header overlay - CORRECTED for scrolling */
+.iframe-wrapper {
+  position: relative;
+  /* ✅ FIXED: Allow overflow for scrolling */
+  overflow: visible;
+  padding-top: 80px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  /* ✅ FIXED: Use min-height instead of fixed height */
+  min-height: calc(100vh - 200px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-    /* Loading overlay */
-    .loading-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255,255,255,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      z-index: 10;
-    }
-    
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-top: 3px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin { 
-      to { transform: rotate(360deg); } 
-    }
-    
-    /* Hide loading overlay after iframe loads */
-    .iframe-loaded .loading-overlay {
-      display: none;
-    }
+.overlay-bar {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: white;
+  z-index: 20;
+  border-radius: 12px 12px 0 0;
+}
 
-    /* Install buttons - centered positioning */
-    #installBtn {
-      display: none;
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);  /* Center horizontally */
-      width: auto;
-      max-width: 280px;             /* Limit maximum width */
-      min-width: 200px;             /* Ensure minimum width */
-      background: rgba(255, 255, 255, 0.95);
-      color: #115ac9;
-      padding: 12px 24px;           /* More balanced padding */
-      font-size: 14px;
-      font-weight: 600;
-      border: 2px solid #115ac9;
-      border-radius: 12px;
-      text-align: center;
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor: pointer;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      white-space: nowrap;          /* Prevent text wrapping */
-    }
 
-    #androidInstallBtn {
-      display: none;
-      position: fixed;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);  /* Center horizontally */
-      width: auto;
-      max-width: 280px;             /* Limit maximum width */
-      min-width: 200px;             /* Ensure minimum width */
-      background: #115ac9;
-      color: white;
-      padding: 12px 24px;           /* More balanced padding */
-      font-size: 14px;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      text-align: center;
-      z-index: 1000;
-      cursor: pointer;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      animation: slideDown 0.3s ease-out;
-      white-space: nowrap;          /* Prevent text wrapping */
-    }
+  .overlay-logo {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;        
+  height: auto;
+  z-index: 21;
+  pointer-events: none;
+}
 
-    /* Close buttons for install prompts - adjusted for centered buttons */
-    .install-close-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: none;
-      border: none;
-      color: inherit;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 0;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.7;
-      border-radius: 50%;
-    }
+#ALCOAC23CTTN {
+  position: relative;
+  top: -80px;
+  width: 100%;
+  /* ✅ FIXED: Make iframe taller for scrolling */
+  height: calc(100vh + 200px);
+  min-height: 800px;
+  border: none;
+  border-radius: 0;
+  background: white;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  /* ✅ FIXED: Add bottom padding and ensure scrolling */
+  padding-bottom: 150px;
+  overflow: auto !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
     
-    .install-close-btn:hover {
-      opacity: 1;
-      background: rgba(0, 0, 0, 0.1);
-    }
+ /* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 10;
+}
 
-    @keyframes slideDown {
-      from {
-        transform: translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
 
-   
-   /* iOS Install Modal */
-    #iosInstallModal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      align-items: flex-start;
-      justify-content: center;
-      z-index: 1001;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      padding: 20px;
-      box-sizing: border-box;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    #iosInstallModal.active { 
-      display: flex; 
-    }
-    
-    #iosInstallModal .modal-content {
-      background: #fff;
-      padding: 20px;
-      width: 100%;
-      max-width: 320px;
-      max-height: calc(100vh - 40px);
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      margin: auto 0;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      box-sizing: border-box;
-    }
-    
-    #iosInstallModal h2 {
-      margin: 0 0 16px 0;
-      color: #115ac9;
-      font-size: 20px;
-      font-weight: 600;
-    }
-    
-    #iosInstallModal .share-icon {
-      width: 48px;
-      height: 48px;
-      margin: 12px auto;
-      color: #115ac9;
-      display: block;
-    }
-    
-    #iosInstallModal ol {
-      text-align: left;
-      padding-left: 20px;
-      margin: 16px 0;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-    
-    #iosInstallModal ol li {
-      margin-bottom: 12px;
-    }
-    
-    #iosInstallModal .instruction-image {
-      width: 100%;
-      max-width: 280px;
-      height: 180px;        /* Fixed height for consistency */
-      object-fit: cover;    /* Crop to fit */
-      object-position: center; /* Center the image */
-      border-radius: 8px;
-      margin: 8px 0 12px 0;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      border: 1px solid #e0e0e0;
-      background: #f5f5f5;  /* Fallback background */
-      display: block;
-    }
-    
-    /* Fallback styling if image doesn't load */
-    #iosInstallModal .instruction-image[alt]:empty::before {
-      content: attr(alt);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #666;
-      font-size: 14px;
-      text-align: center;
-      padding: 20px;
-    }
-    
-    #iosInstallModal button#closeModal {
-      background: #115ac9;
-      border: none;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 12px;
-    }
+@keyframes spin { 
+  to { transform: rotate(360deg); } 
+}
 
-    /* Mobile optimizations - updated for better mobile experience */
-    @media screen and (max-width: 480px) {
-      .ghl-container {
-        padding: 5px;
-        height: 100vh;
-        height: calc(var(--vh, 1vh) * 100);
-      }
-      
-      .overlay-logo {
-        width: 130px;
-        top: 15px;
-      }
-      
-      .iframe-wrapper {
-        padding-top: 70px;
-      }
-      
-      .overlay-bar {
-        height: 70px;
-      }
-      
-      #ALCOAC23CTTN {
-        top: -70px;
-        height: calc(var(--vh, 1vh) * 100 - 100px);
-        min-height: 500px;
-      }
-    }
+.iframe-loaded .loading-overlay {
+  display: none;
+}
 
-    /* Extra small screens */
-    @media screen and (max-width: 360px) {
-      .overlay-logo {
-        width: 110px;
-        top: 12px;
-      }
-      
-      .iframe-wrapper {
-        padding-top: 60px;
-      }
-      
-      .overlay-bar {
-        height: 60px;
-      }
-      
-      #ALCOAC23CTTN {
-        top: -60px;
-        height: calc(var(--vh, 1vh) * 100 - 90px);
-        min-height: 450px;
-      }
-    }
+/* Install buttons - centered positioning */
+#installBtn {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: 280px;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #115ac9;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid #115ac9;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
 
-    /* Landscape orientation - better height management */
-    @media screen and (max-height: 500px) and (orientation: landscape) {
-      .ghl-container {
-        padding: 3px;
-      }
-      
-      .overlay-logo {
-        width: 100px;
-        top: 8px;
-      }
-      
-      .iframe-wrapper {
-        padding-top: 45px;
-      }
-      
-      .overlay-bar {
-        height: 45px;
-      }
-      
-      #ALCOAC23CTTN {
-        top: -45px;
-        height: calc(var(--vh, 1vh) * 100 - 60px);
-        min-height: 350px;
-      }
-    }
+#androidInstallBtn {
+  display: none;
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: 280px;
+  min-width: 200px;
+  background: #115ac9;
+  color: white;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  text-align: center;
+  z-index: 1000;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.3s ease-out;
+  white-space: nowrap;
+}
+
+.install-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  border-radius: 50%;
+}
+
+.install-close-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* iOS Install Modal */
+#iosInstallModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1001;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#iosInstallModal.active { 
+  display: flex; 
+}
+
+#iosInstallModal .modal-content {
+  background: #fff;
+  padding: 20px;
+  width: 100%;
+  max-width: 320px;
+  max-height: calc(100vh - 40px);
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  margin: auto 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+#iosInstallModal h2 {
+  margin: 0 0 16px 0;
+  color: #115ac9;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+#iosInstallModal .share-icon {
+  width: 48px;
+  height: 48px;
+  margin: 12px auto;
+  color: #115ac9;
+  display: block;
+}
+
+#iosInstallModal ol {
+  text-align: left;
+  padding-left: 20px;
+  margin: 16px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#iosInstallModal ol li {
+  margin-bottom: 12px;
+}
+
+#iosInstallModal .instruction-image {
+  width: 100%;
+  max-width: 280px;
+  height: 180px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 8px;
+  margin: 8px 0 12px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e0e0e0;
+  background: #f5f5f5;
+  display: block;
+}
+
+#iosInstallModal .instruction-image[alt]:empty::before {
+  content: attr(alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+#iosInstallModal button#closeModal {
+  background: #115ac9;
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+}
+/* ✅ FIXED: Mobile optimizations with enhanced scrolling */
+@media screen and (max-width: 480px) {
+  html, body {
+    padding-bottom: 150px;
+  }
+  
+  .ghl-container {
+    padding: 5px;
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    padding-bottom: 160px;
+  }
+  
+  .iframe-container {
+    min-height: calc(100vh - 180px);
+    margin-bottom: 140px;
+  }
+  
+  .overlay-logo {
+    width: 130px;
+    top: 15px;
+  }
+  
+  .iframe-wrapper {
+    padding-top: 70px;
+    min-height: calc(100vh - 220px);
+  }
+  
+  .overlay-bar {
+    height: 70px;
+  }
+  
+  #ALCOAC23CTTN {
+    top: -70px;
+    height: calc(100vh + 300px);
+    min-height: 700px;
+    padding-bottom: 180px;
+  }
+  
+  .scroll-helper {
+    bottom: 160px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 16px;
+  }
+}
+
+/* Extra small screens */
+@media screen and (max-width: 360px) {
+  html, body {
+    padding-bottom: 170px;
+  }
+  
+  .ghl-container {
+    padding-bottom: 180px;
+  }
+  
+  .iframe-container {
+    margin-bottom: 160px;
+  }
+  
+  .overlay-logo {
+    width: 110px;
+    top: 12px;
+  }
+  
+  .iframe-wrapper {
+    padding-top: 60px;
+  }
+  
+  .overlay-bar {
+    height: 60px;
+  }
+  
+  #ALCOAC23CTTN {
+    top: -60px;
+    height: calc(100vh + 350px);
+    min-height: 650px;
+    padding-bottom: 200px;
+  }
+}
+
+/* Landscape orientation - enhanced for scrolling */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  html, body {
+    padding-bottom: 120px;
+  }
+  
+  .ghl-container {
+    padding: 3px;
+    padding-bottom: 140px;
+  }
+  
+  .iframe-container {
+    margin-bottom: 100px;
+  }
+  
+  .overlay-logo {
+    width: 100px;
+    top: 8px;
+  }
+  
+  .iframe-wrapper {
+    padding-top: 45px;
+  }
+  
+  .overlay-bar {
+    height: 45px;
+  }
+  
+  #ALCOAC23CTTN {
+    top: -45px;
+    height: calc(100vh + 200px);
+    min-height: 500px;
+    padding-bottom: 150px;
+  }
+  
+  .scroll-helper {
+    bottom: 100px;
+  }
+}
+/* ✅ NEW: Scroll helper button */
+.scroll-helper {
+  position: fixed;
+  bottom: 140px;
+  right: 20px;
+  background: rgba(17, 90, 201, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  font-size: 18px;
+}
+
+.scroll-helper:hover {
+  background: rgba(17, 90, 201, 1);
+  transform: scale(1.1);
+}
+
+.scroll-helper.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ✅ NEW: Bottom safe zone for ad protection */
+.bottom-safe-zone {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: transparent;
+  pointer-events: none;
+  z-index: 9999;
+}
+/* ✅ NEW: Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ✅ NEW: Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
   </style>
 </head>
 <body>
@@ -480,261 +606,401 @@
 
  <script>
     // Service worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(err => {
-        console.log('Service worker registration failed:', err);
+   // Clean PWA script with anti-ad scrolling protection
+// Replace your entire <script> section with this
+
+// Service worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(err => {
+    console.log('Service worker registration failed:', err);
+  });
+}
+
+// Create scroll helper button
+function createScrollHelper() {
+  const scrollBtn = document.createElement('button');
+  scrollBtn.className = 'scroll-helper';
+  scrollBtn.innerHTML = '↓';
+  scrollBtn.title = 'Scroll to access submit button';
+  
+  scrollBtn.addEventListener('click', () => {
+    const iframe = document.getElementById('ALCOAC23CTTN');
+    
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      if (iframeDoc) {
+        const submitBtn = iframeDoc.querySelector(
+          'input[type="submit"], button[type="submit"], .submit-btn, .submit-button, ' +
+          '.book-appointment, .schedule-btn, [onclick*="submit"], [onclick*="book"]'
+        );
+        
+        if (submitBtn) {
+          submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          iframeDoc.documentElement.scrollTop = iframeDoc.documentElement.scrollHeight;
+        }
+      }
+    } catch (e) {
+      window.scrollTo({
+        top: document.body.scrollHeight - window.innerHeight - 100,
+        behavior: 'smooth'
       });
     }
-
-    // Configure iframe with URL parameters
-    function configure() {
-      const iframe = document.getElementById("ALCOAC23CTTN");
-      
-      function appendQueryParams(url, params) {
-        const urlObj = new URL(url);
-        const searchParams = new URLSearchParams(urlObj.search);
-        for (const key in params) {
-          if (!params.hasOwnProperty(key)) continue;
-          searchParams.append(key, params[key]);
-        }
-        urlObj.search = searchParams.toString();
-        return urlObj.toString();
-      }
-      
-      function getParamsFromURL() {
-        const searchParams = new URLSearchParams(window.location.search);
-        const params = {};
-        const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
-        for (const key of keys) {
-          if (!searchParams.has(key)) continue;
-          params[key] = searchParams.get(key);
-        }
-        return params;
-      }
-      
-      const params = getParamsFromURL();
-      iframe.src = appendQueryParams(iframe.src, params);
-      console.log('Updated iframe URL:', iframe.src);
-      
-      // Handle iframe loading
-      let loadingHidden = false;
-      
-      function hideLoader() {
-        if (!loadingHidden) {
-          document.querySelector('.iframe-container').classList.add('iframe-loaded');
-          loadingHidden = true;
-          console.log('Iframe loaded successfully');
-        }
-      }
-      
-      iframe.onload = function() {
-        hideLoader();
-        
-        // Try to remove any margins/padding from iframe content and ensure scrolling
-        try {
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-          if (iframeDoc && iframeDoc.body) {
-            iframeDoc.body.style.margin = '0';
-            iframeDoc.body.style.padding = '0';
-            iframeDoc.body.style.overflow = 'auto';
-            iframeDoc.documentElement.style.overflow = 'auto';
-            console.log('Iframe body styling applied');
-          }
-        } catch (e) {
-          console.log('Cannot access iframe content (cross-origin)');
-        }
-        
-        // Ensure iframe itself can scroll
-        iframe.style.overflow = 'auto';
-        iframe.scrolling = 'yes';
-        
-        console.log('New form iframe loaded and configured for scrolling');
-      };
-      
-      iframe.onerror = function() {
-        console.log('Iframe failed to load');
-        hideLoader();
-      };
-      
-      // Fallback timeout
-      setTimeout(hideLoader, 3000);
-    }
-
-    // Fixed iOS install detection and modal handling
-    function handleIOSInstall() {
-      const ua = navigator.userAgent.toLowerCase();
-      const isIOS = /iphone|ipad|ipod/.test(ua) || 
-                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      // Check if app is running in standalone mode (already installed)
-      const isStandalone = window.navigator.standalone || 
-                          window.matchMedia('(display-mode: standalone)').matches;
-      
-      if (isIOS && !isStandalone) {
-        const btn = document.getElementById('installBtn');
-        const modal = document.getElementById('iosInstallModal');
-        const closeBtn = document.getElementById('closeModal');
-
-        // Show install button with auto-hide
-        btn.style.display = 'block';
-        
-        // Auto-hide after 8 seconds to not interfere with form
-        setTimeout(() => {
-          if (btn.style.display === 'block') {
-            btn.style.opacity = '0.7';
-          }
-        }, 8000);
-        
-        setTimeout(() => {
-          if (btn.style.display === 'block') {
-            btn.style.display = 'none';
-          }
-        }, 15000);
-        
-        // Button click handler
-        btn.onclick = function() {
-          modal.classList.add('active');
-        };
-        
-        // Close button handler
-        closeBtn.onclick = function() {
-          modal.classList.remove('active');
-        };
-        
-        // Close modal when clicking outside
-        modal.onclick = function(e) {
-          if (e.target === modal) {
-            modal.classList.remove('active');
-          }
-        };
-        
-        // Auto-show modal after a delay (optional)
-        setTimeout(() => {
-          if (!sessionStorage.getItem('installPromptShown')) {
-            modal.classList.add('active');
-            sessionStorage.setItem('installPromptShown', 'true');
-          }
-        }, 5000);
-      }
-    }
-
-    // *** ADD THE ANDROID INSTALL CODE HERE ***
-    // Android PWA install handling
-    let deferredPrompt;
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('beforeinstallprompt fired');
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      deferredPrompt = e;
-      
-      // Show Android install button
-      const androidBtn = document.getElementById('androidInstallBtn');
-      if (androidBtn) {
-        androidBtn.style.display = 'block';
-        
-        // Auto-hide after 10 seconds
-        setTimeout(() => {
-          if (androidBtn.style.display === 'block') {
-            androidBtn.style.display = 'none';
-          }
-        }, 10000);
-      }
-    });
-
-    // Handle Android install button click
-    document.getElementById('androidInstallBtn').addEventListener('click', async () => {
-      if (deferredPrompt) {
-        // Show the install prompt
-        deferredPrompt.prompt();
-        
-        // Wait for the user to respond to the prompt
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
-        
-        // Clear the deferredPrompt so it can only be used once
-        deferredPrompt = null;
-        
-        // Hide the install button
-        document.getElementById('androidInstallBtn').style.display = 'none';
-      }
-    });
-
-    // Handle successful installation
-    window.addEventListener('appinstalled', (evt) => {
-      console.log('App was installed');
-      // Hide all install buttons
-      document.getElementById('androidInstallBtn').style.display = 'none';
-      document.getElementById('installBtn').style.display = 'none';
-    });
-    // *** END OF ANDROID INSTALL CODE ***
-
-    // Initialize everything when page loads
-    if (document.readyState === 'complete') {
-      configure();
-      handleIOSInstall();
-      fixMobileHeight();
-      console.log('App initialized on page ready');
+  });
+  
+  document.body.appendChild(scrollBtn);
+  
+  function toggleScrollHelper() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+    
+    if (scrollTop + windowHeight < docHeight - 100) {
+      scrollBtn.classList.remove('hidden');
     } else {
-      window.addEventListener('load', function() {
-        configure();
-        handleIOSInstall();
-        fixMobileHeight();
-        console.log('App initialized on load');
-        
-        // Debug overlay positioning
-        setTimeout(() => {
-          const overlay = document.querySelector('.overlay-bar');
-          const logo = document.querySelector('.overlay-logo');
-          const iframe = document.querySelector('#ALCOAC23CTTN');
-          console.log('Overlay bar:', overlay ? 'found' : 'not found');
-          console.log('Overlay logo:', logo ? 'found' : 'not found');
-          console.log('Iframe height:', iframe ? iframe.offsetHeight + 'px' : 'not found');
-        }, 1000);
-      });
+      scrollBtn.classList.add('hidden');
     }
+  }
+  
+  window.addEventListener('scroll', toggleScrollHelper);
+  setTimeout(toggleScrollHelper, 1000);
+}
 
-    // Fix mobile viewport height issues
-    function fixMobileHeight() {
-      function setViewportHeight() {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
+// Create bottom safe zone
+function createBottomSafeZone() {
+  const safeZone = document.createElement('div');
+  safeZone.className = 'bottom-safe-zone';
+  document.body.appendChild(safeZone);
+}
+
+// Enhanced iframe configuration with anti-ad protection
+function configureWithAdProtection() {
+  const iframe = document.getElementById("ALCOAC23CTTN");
+  
+  function appendQueryParams(url, params) {
+    const urlObj = new URL(url);
+    const searchParams = new URLSearchParams(urlObj.search);
+    for (const key in params) {
+      if (!params.hasOwnProperty(key)) continue;
+      searchParams.append(key, params[key]);
+    }
+    urlObj.search = searchParams.toString();
+    return urlObj.toString();
+  }
+  
+  function getParamsFromURL() {
+    const searchParams = new URLSearchParams(window.location.search);
+    const params = {};
+    const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
+    for (const key of keys) {
+      if (!searchParams.has(key)) continue;
+      params[key] = searchParams.get(key);
+    }
+    return params;
+  }
+  
+  const params = getParamsFromURL();
+  iframe.src = appendQueryParams(iframe.src, params);
+  console.log('Updated iframe URL:', iframe.src);
+  
+  let loadingHidden = false;
+  
+  function hideLoader() {
+    if (!loadingHidden) {
+      document.querySelector('.iframe-container').classList.add('iframe-loaded');
+      loadingHidden = true;
+      console.log('Iframe loaded successfully');
+    }
+  }
+  
+  iframe.onload = function() {
+    hideLoader();
+    
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      if (iframeDoc && iframeDoc.body) {
+        // Basic styling
+        iframeDoc.body.style.margin = '0';
+        iframeDoc.body.style.padding = '0';
+        iframeDoc.body.style.overflow = 'auto';
+        iframeDoc.documentElement.style.overflow = 'auto';
         
-        // Force iframe recalculation
-        const iframe = document.getElementById('ALCOAC23CTTN');
-        if (iframe) {
-          const newHeight = window.innerHeight - 120; // Account for padding and overlay
-          if (newHeight > 400) { // Minimum reasonable height
-            iframe.style.height = `${newHeight}px`;
-          }
-        }
+        // ANTI-AD PROTECTION: Add bottom padding
+        iframeDoc.body.style.paddingBottom = '200px';
+        iframeDoc.documentElement.style.paddingBottom = '150px';
+        iframeDoc.documentElement.style.scrollBehavior = 'smooth';
+        iframeDoc.body.style.webkitOverflowScrolling = 'touch';
+        
+        // Find and protect submit buttons
+        const submitButtons = iframeDoc.querySelectorAll(
+          'input[type="submit"], button[type="submit"], .submit-btn, .submit-button, ' +
+          '.book-appointment, .schedule-btn, button[onclick*="submit"], button[onclick*="book"], ' +
+          'button[onclick*="schedule"], .btn-primary, .btn-success'
+        );
+        
+        submitButtons.forEach((btn, index) => {
+          btn.style.marginBottom = '150px';
+          btn.style.position = 'relative';
+          btn.style.zIndex = '999';
+          btn.style.padding = '12px 24px';
+          btn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+          btn.style.border = '2px solid #115ac9';
+          
+          btn.addEventListener('click', function(e) {
+            setTimeout(() => {
+              btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+          });
+          
+          console.log(`Protected submit button ${index + 1}:`, btn);
+        });
+        
+        // Add protective div at bottom
+        const protectiveDiv = iframeDoc.createElement('div');
+        protectiveDiv.style.height = '200px';
+        protectiveDiv.style.width = '100%';
+        protectiveDiv.style.background = 'transparent';
+        protectiveDiv.innerHTML = '<div style="text-align:center;padding:50px;color:#999;font-size:14px;">Scroll up if you can\'t see the submit button</div>';
+        iframeDoc.body.appendChild(protectiveDiv);
+        
+        iframeDoc.addEventListener('scroll', () => {
+          window.dispatchEvent(new Event('scroll'));
+        });
+        
+        console.log('Enhanced scrolling protection applied to iframe');
       }
+    } catch (e) {
+      console.log('Cross-origin iframe - applying external protection');
+      iframe.style.marginBottom = '200px';
+      iframe.style.paddingBottom = '150px';
+      iframe.setAttribute('scrolling', 'yes');
+      iframe.style.overflow = 'auto';
+    }
+    
+    iframe.scrolling = 'yes';
+    iframe.style.overflow = 'auto';
+    iframe.style.overflowX = 'hidden';
+    iframe.style.overflowY = 'auto';
+  };
+  
+  iframe.onerror = function() {
+    console.log('Iframe failed to load');
+    hideLoader();
+  };
+  
+  setTimeout(hideLoader, 3000);
+}
+
+// Enhanced iOS install
+function enhancedIOSInstall() {
+  const ua = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(ua) || 
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  const isStandalone = window.navigator.standalone || 
+                      window.matchMedia('(display-mode: standalone)').matches;
+  
+  if (isIOS && !isStandalone) {
+    const btn = document.getElementById('installBtn');
+    const modal = document.getElementById('iosInstallModal');
+    
+    btn.innerHTML = `
+      Add to Home Screen
+      <small style="display:block;font-size:11px;opacity:0.8;">Removes ads & improves performance</small>
+      <span class="install-close-btn" onclick="event.stopPropagation(); this.parentElement.style.display='none';">×</span>
+    `;
+    
+    btn.style.display = 'block';
+    
+    setTimeout(() => {
+      if (!sessionStorage.getItem('installPromptShown')) {
+        modal.classList.add('active');
+        sessionStorage.setItem('installPromptShown', 'true');
+      }
+    }, 3000);
+    
+    btn.onclick = function() {
+      modal.classList.add('active');
+    };
+    
+    document.getElementById('closeModal').onclick = function() {
+      modal.classList.remove('active');
+    };
+    
+    modal.onclick = function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    };
+  }
+}
+
+// Enhanced Android install
+function enhancedAndroidInstall() {
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt fired');
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    const androidBtn = document.getElementById('androidInstallBtn');
+    if (androidBtn) {
+      androidBtn.innerHTML = `
+        Install App - Remove Ads!
+        <span class="install-close-btn" onclick="event.stopPropagation(); this.parentElement.style.display='none';">×</span>
+      `;
       
-      setViewportHeight();
-      window.addEventListener('resize', setViewportHeight);
-      window.addEventListener('orientationchange', () => {
-        setTimeout(setViewportHeight, 100);
-      });
+      androidBtn.style.display = 'block';
+      
+      setTimeout(() => {
+        if (androidBtn.style.display === 'block') {
+          androidBtn.style.display = 'none';
+        }
+      }, 15000);
     }
+  });
 
+  document.getElementById('androidInstallBtn').addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response: ${outcome}`);
+      deferredPrompt = null;
+      document.getElementById('androidInstallBtn').style.display = 'none';
+    }
+  });
 
-    // Prevent zoom on iOS
-    document.addEventListener('touchstart', function(event) {
-      if (event.touches.length > 1) {
-        event.preventDefault();
-      }
-    });
+  window.addEventListener('appinstalled', (evt) => {
+    console.log('App installed - ads should be removed');
+    document.getElementById('androidInstallBtn').style.display = 'none';
+    document.getElementById('installBtn').style.display = 'none';
+  });
+}
 
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(event) {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
+// Show scroll tip if needed
+function setupAutoScrollHelp() {
+  let hasShownScrollTip = false;
+  
+  function checkIfScrollHelpNeeded() {
+    if (hasShownScrollTip) return;
+    
+    const windowHeight = window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+    
+    if (docHeight > windowHeight + 200) {
+      setTimeout(() => {
+        if (!hasShownScrollTip) {
+          showScrollTip();
+          hasShownScrollTip = true;
+        }
+      }, 5000);
+    }
+  }
+  
+  function showScrollTip() {
+    const tip = document.createElement('div');
+    tip.style.cssText = `
+      position: fixed;
+      bottom: 200px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(17, 90, 201, 0.95);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      text-align: center;
+      max-width: 280px;
+    `;
+    
+    tip.innerHTML = `
+      <div>💡 Scroll down to access the submit button</div>
+      <div style="font-size:12px;opacity:0.8;margin-top:4px;">Tap the ↓ button or swipe up</div>
+    `;
+    
+    document.body.appendChild(tip);
+    
+    setTimeout(() => {
+      tip.style.opacity = '0';
+      tip.style.transform = 'translateX(-50%) translateY(20px)';
+      setTimeout(() => tip.remove(), 300);
+    }, 4000);
+    
+    const hideOnScroll = () => {
+      tip.style.opacity = '0';
+      setTimeout(() => tip.remove(), 300);
+      window.removeEventListener('scroll', hideOnScroll);
+    };
+    window.addEventListener('scroll', hideOnScroll);
+  }
+  
+  setTimeout(checkIfScrollHelpNeeded, 2000);
+}
+
+// Fix mobile viewport height with scrolling support
+function fixMobileHeightWithScrolling() {
+  function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    
+    const iframe = document.getElementById('ALCOAC23CTTN');
+    if (iframe) {
+      // Make iframe taller than viewport to ensure scrolling
+      const minHeight = Math.max(window.innerHeight + 200, 800);
+      iframe.style.minHeight = `${minHeight}px`;
+    }
+  }
+  
+  setViewportHeight();
+  window.addEventListener('resize', setViewportHeight);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(setViewportHeight, 100);
+  });
+}
+
+// Prevent zoom but allow scrolling
+document.addEventListener('touchstart', function(event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+});
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+  const now = (new Date()).getTime();
+  if (now - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+
+// Initialize everything with enhanced protection
+function initializeEnhancedPWA() {
+  // Enable body scrolling
+  document.body.style.overflow = 'auto';
+  document.documentElement.style.overflow = 'auto';
+  
+  createBottomSafeZone();
+  createScrollHelper();
+  configureWithAdProtection();
+  enhancedIOSInstall();
+  enhancedAndroidInstall();
+  setupAutoScrollHelp();
+  fixMobileHeightWithScrolling();
+  
+  console.log('Enhanced PWA with scrolling ad protection initialized');
+}
+
+// SINGLE INITIALIZATION - No conflicts
+if (document.readyState === 'complete') {
+  initializeEnhancedPWA();
+} else {
+  window.addEventListener('load', initializeEnhancedPWA);
+}
   </script>
 </body>
 </html>
