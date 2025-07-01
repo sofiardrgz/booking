@@ -694,16 +694,16 @@ function configureWithAdProtection() {
   sessionStorage.setItem('trackstat_source', source);
   sessionStorage.setItem('trackstat_source_url', sourceUrl);
   
-  function appendQueryParams(url, params) {
-    const urlObj = new URL(url);
-    const searchParams = new URLSearchParams(urlObj.search);
-    for (const key in params) {
-      if (!params.hasOwnProperty(key)) continue;
-      searchParams.append(key, params[key]);
-    }
-    urlObj.search = searchParams.toString();
-    return urlObj.toString();
+function appendQueryParams(url, params) {
+  const urlObj = new URL(url);
+  const searchParams = new URLSearchParams(urlObj.search);
+  for (const key in params) {
+    if (!params.hasOwnProperty(key)) continue;
+    searchParams.set(key, params[key]); // ✅ Changed append to set
   }
+  urlObj.search = searchParams.toString();
+  return urlObj.toString();
+}
   
   function getParamsFromURL() {
     const searchParams = new URLSearchParams(window.location.search);
@@ -723,20 +723,21 @@ function configureWithAdProtection() {
   
   const params = getParamsFromURL();
   
-  // STORE contact details for thank you page
-  if (Object.keys(params).length > 0) {
-      const contactDetails = {};
-      const contactKeys = ["first_name", "last_name", "email", "phone", "birth_date"];
-      for (const key of contactKeys) {
-          if (params[key]) {
-              contactDetails[key] = params[key];
-          }
-      }
-      
-      if (Object.keys(contactDetails).length > 0) {
-          sessionStorage.setItem('trackstat_contact_details', JSON.stringify(contactDetails));
-      }
-  }
+// STORE contact details for thank you page
+if (Object.keys(params).length > 0) {
+    const contactDetails = {};
+    const contactKeys = ["first_name", "last_name", "email", "phone", "birth_date"];
+    for (const key of contactKeys) {
+        if (params[key]) {
+            contactDetails[key] = params[key];
+        }
+    }
+    
+    if (Object.keys(contactDetails).length > 0) {
+        sessionStorage.setItem('trackstat_contact_details', JSON.stringify(contactDetails));
+        console.log('PWA Stored contact details:', contactDetails); // ✅ Added logging
+    }
+}
   
   // Send initial tracking (form viewed) - PWA specific
   if (Object.keys(params).length > 0 || source !== 'unknown') {
@@ -757,8 +758,43 @@ function configureWithAdProtection() {
       }).catch(err => console.log('PWA Tracking error:', err));
   }
   
-  iframe.src = appendQueryParams(iframe.src, params);
-  console.log('PWA Updated iframe URL:', iframe.src);
+ // Check if we have contact parameters for prefill logic
+if (Object.keys(params).length === 0) {
+    console.log('PWA: No contact parameters, skipping prefill logic');
+    // Still update iframe with source parameters
+    iframe.src = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 
+                 'source_origin=' + encodeURIComponent(source) + 
+                 '&source_url_origin=' + encodeURIComponent(sourceUrl);
+    console.log('PWA Updated iframe URL (source only):', iframe.src);
+} else {
+    console.log('PWA: Found contact parameters, running prefill logic');
+    
+    // Give auto-prefill time to work
+    setTimeout(function() {
+      
+      // Check if auto-prefill already worked (parameters in iframe URL)
+      const iframeUrl = new URL(iframe.src);
+      const iframeParams = new URLSearchParams(iframeUrl.search);
+      
+      let autoPrefillWorked = false;
+      const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
+      for (const key of keys) {
+        if (iframeParams.has(key)) {
+          autoPrefillWorked = true;
+          break;
+        }
+      }
+      
+      // If auto-prefill didn't work, run our script
+      if (!autoPrefillWorked) {
+        iframe.src = appendQueryParams(iframe.src, params);
+        console.log('PWA: Auto-prefill failed, updated iframe URL:', iframe.src);
+      } else {
+        console.log('PWA: Auto-prefill worked, no manual intervention needed');
+      }
+      
+    }, 2000); // Wait 2 seconds for auto-prefill
+}
   
   let loadingHidden = false;
   
