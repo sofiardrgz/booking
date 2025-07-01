@@ -604,11 +604,7 @@ html {
     </div>
   </div>
 
- <script>
-    // Service worker for PWA
-   // Clean PWA script with anti-ad scrolling protection
-// Replace your entire <script> section with this
-
+   <script>
 // Service worker for PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(err => {
@@ -673,9 +669,30 @@ function createBottomSafeZone() {
   document.body.appendChild(safeZone);
 }
 
-// Enhanced iframe configuration with anti-ad protection
+// Enhanced iframe configuration with anti-ad protection AND source detection
 function configureWithAdProtection() {
   const iframe = document.getElementById("ALCOAC23CTTN");
+  
+  // DETECT SOURCE - Where is this embedded?
+  let source = 'unknown';
+  let sourceUrl = '';
+  
+  const currentHostname = window.location.hostname;
+  const currentUrl = window.location.href;
+  
+  if (currentHostname.includes('alcoachiropractic.com') && currentUrl.includes('/book-appointment')) {
+      source = 'ghl_funnel';
+      sourceUrl = 'alcoachiropractic.com/book-appointment';
+  } else if (currentHostname.includes('booking.alcoachiropractic.com')) {
+      source = 'pwa_qr_code';
+      sourceUrl = 'booking.alcoachiropractic.com';
+  }
+  
+  console.log('PWA Detected source:', source, 'URL:', sourceUrl);
+  
+  // STORE source info for thank you page
+  sessionStorage.setItem('trackstat_source', source);
+  sessionStorage.setItem('trackstat_source_url', sourceUrl);
   
   function appendQueryParams(url, params) {
     const urlObj = new URL(url);
@@ -696,12 +713,52 @@ function configureWithAdProtection() {
       if (!searchParams.has(key)) continue;
       params[key] = searchParams.get(key);
     }
+    
+    // ADD SOURCE INFO to parameters passed to TrackStat
+    params['source_origin'] = source;
+    params['source_url_origin'] = sourceUrl;
+    
     return params;
   }
   
   const params = getParamsFromURL();
+  
+  // STORE contact details for thank you page
+  if (Object.keys(params).length > 0) {
+      const contactDetails = {};
+      const contactKeys = ["first_name", "last_name", "email", "phone", "birth_date"];
+      for (const key of contactKeys) {
+          if (params[key]) {
+              contactDetails[key] = params[key];
+          }
+      }
+      
+      if (Object.keys(contactDetails).length > 0) {
+          sessionStorage.setItem('trackstat_contact_details', JSON.stringify(contactDetails));
+      }
+  }
+  
+  // Send initial tracking (form viewed) - PWA specific
+  if (Object.keys(params).length > 0 || source !== 'unknown') {
+      fetch('https://services.leadconnectorhq.com/hooks/QOxAQzWYPxtKuZsAaWqa/webhook-trigger/464f4828-eacb-4451-8e4f-46374f0af3ce', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+              event: 'form_viewed',
+              action: 'viewed_scheduling_page',
+              source: source,
+              source_url: sourceUrl,
+              contact: Object.keys(params).length > 0 ? params : {},
+              page: window.location.href,
+              referrer: document.referrer,
+              timestamp: new Date().toISOString(),
+              platform: 'pwa'
+          })
+      }).catch(err => console.log('PWA Tracking error:', err));
+  }
+  
   iframe.src = appendQueryParams(iframe.src, params);
-  console.log('Updated iframe URL:', iframe.src);
+  console.log('PWA Updated iframe URL:', iframe.src);
   
   let loadingHidden = false;
   
@@ -986,13 +1043,13 @@ function initializeEnhancedPWA() {
   
   createBottomSafeZone();
   createScrollHelper();
-  configureWithAdProtection();
+  configureWithAdProtection(); // Now includes source detection
   enhancedIOSInstall();
   enhancedAndroidInstall();
   setupAutoScrollHelp();
   fixMobileHeightWithScrolling();
   
-  console.log('Enhanced PWA with scrolling ad protection initialized');
+  console.log('Enhanced PWA with scrolling ad protection and source detection initialized');
 }
 
 // SINGLE INITIALIZATION - No conflicts
