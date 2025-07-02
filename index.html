@@ -23,7 +23,7 @@
   /* ✅ FIXED: Enable scrolling */
   overflow: auto !important;
   overflow-x: hidden;
-  padding-bottom: 120px;
+  padding-bottom: 200px;
   font-family: 'Manrope', sans-serif;
   background: #115ac9;
   /* Fix iOS viewport issues */
@@ -39,7 +39,7 @@
   padding: 10px;
   box-sizing: border-box;
   /* ✅ FIXED: Add bottom padding for scrolling space */
-  padding-bottom: 140px;
+  padding-bottom: 220px;
 }
 
 
@@ -60,7 +60,7 @@
   min-height: calc(100vh - 160px);
   display: flex;
   flex-direction: column;
-  margin-bottom: 120px;
+  margin-bottom: 200px;
 }
 
 
@@ -109,7 +109,7 @@
   top: -80px;
   width: 100%;
   /* ✅ FIXED: Make iframe taller for scrolling */
-  height: calc(100vh + 200px);
+  height: calc(100vh + 300px);
   min-height: 800px;
   border: none;
   border-radius: 0;
@@ -118,7 +118,7 @@
   padding: 0;
   flex: 1;
   /* ✅ FIXED: Add bottom padding and ensure scrolling */
-  padding-bottom: 150px;
+  padding-bottom: 250px;
   overflow: auto !important;
   overflow-x: hidden;
   overflow-y: auto;
@@ -350,19 +350,19 @@
 /* ✅ FIXED: Mobile optimizations with enhanced scrolling */
 @media screen and (max-width: 480px) {
   html, body {
-    padding-bottom: 150px;
+    padding-bottom: 250px;
   }
   
   .ghl-container {
     padding: 5px;
     min-height: 100vh;
     min-height: calc(var(--vh, 1vh) * 100);
-    padding-bottom: 160px;
+    padding-bottom: 260px;
   }
   
   .iframe-container {
     min-height: calc(100vh - 180px);
-    margin-bottom: 140px;
+    margin-bottom: 240px;
   }
   
   .overlay-logo {
@@ -381,9 +381,9 @@
   
   #ALCOAC23CTTN {
     top: -70px;
-    height: calc(100vh + 300px);
+    height: calc(100vh + 400px);
     min-height: 700px;
-    padding-bottom: 180px;
+    padding-bottom: 280px;
   }
   
   .scroll-helper {
@@ -398,15 +398,15 @@
 /* Extra small screens */
 @media screen and (max-width: 360px) {
   html, body {
-    padding-bottom: 170px;
+    padding-bottom: 270px;
   }
   
   .ghl-container {
-    padding-bottom: 180px;
+    padding-bottom: 280px;
   }
   
   .iframe-container {
-    margin-bottom: 160px;
+    margin-bottom: 260px;
   }
   
   .overlay-logo {
@@ -424,25 +424,25 @@
   
   #ALCOAC23CTTN {
     top: -60px;
-    height: calc(100vh + 350px);
+    height: calc(100vh + 450px);
     min-height: 650px;
-    padding-bottom: 200px;
+    padding-bottom: 300px;
   }
 }
 
 /* Landscape orientation - enhanced for scrolling */
 @media screen and (max-height: 500px) and (orientation: landscape) {
   html, body {
-    padding-bottom: 120px;
+    padding-bottom: 200px;
   }
   
   .ghl-container {
     padding: 3px;
-    padding-bottom: 140px;
+    padding-bottom: 220px;
   }
   
   .iframe-container {
-    margin-bottom: 100px;
+    margin-bottom: 180px;
   }
   
   .overlay-logo {
@@ -460,9 +460,9 @@
   
   #ALCOAC23CTTN {
     top: -45px;
-    height: calc(100vh + 200px);
+    height: calc(100vh + 300px);
     min-height: 500px;
-    padding-bottom: 150px;
+    padding-bottom: 230px;
   }
   
   .scroll-helper {
@@ -472,7 +472,7 @@
 /* ✅ NEW: Scroll helper button */
 .scroll-helper {
   position: fixed;
-  bottom: 140px;
+  bottom: 180px;
   right: 20px;
   background: rgba(17, 90, 201, 0.9);
   color: white;
@@ -508,7 +508,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px;
+  height: 120px;
   background: transparent;
   pointer-events: none;
   z-index: 9999;
@@ -764,8 +764,8 @@ function configureWithAdProtection() {
         iframeDoc.documentElement.style.overflow = 'auto';
         
         // ANTI-AD PROTECTION: Add bottom padding
-        iframeDoc.body.style.paddingBottom = '200px';
-        iframeDoc.documentElement.style.paddingBottom = '150px';
+        iframeDoc.body.style.paddingBottom = '300px';
+        iframeDoc.documentElement.style.paddingBottom = '250px';
         iframeDoc.documentElement.style.scrollBehavior = 'smooth';
         iframeDoc.body.style.webkitOverflowScrolling = 'touch';
         
@@ -777,7 +777,7 @@ function configureWithAdProtection() {
         );
         
         submitButtons.forEach((btn, index) => {
-          btn.style.marginBottom = '150px';
+          btn.style.marginBottom = '200px';
           btn.style.position = 'relative';
           btn.style.zIndex = '999';
           btn.style.padding = '12px 24px';
@@ -795,7 +795,7 @@ function configureWithAdProtection() {
         
         // Add protective div at bottom
         const protectiveDiv = iframeDoc.createElement('div');
-        protectiveDiv.style.height = '200px';
+        protectiveDiv.style.height = '300px';
         protectiveDiv.style.width = '100%';
         protectiveDiv.style.background = 'transparent';
         protectiveDiv.innerHTML = '<div style="text-align:center;padding:50px;color:#999;font-size:14px;">Scroll up if you can\'t see the submit button</div>';
@@ -809,8 +809,8 @@ function configureWithAdProtection() {
       }
     } catch (e) {
       console.log('Cross-origin iframe - applying external protection');
-      iframe.style.marginBottom = '200px';
-      iframe.style.paddingBottom = '150px';
+      iframe.style.marginBottom = '300px';
+      iframe.style.paddingBottom = '250px';
       iframe.setAttribute('scrolling', 'yes');
       iframe.style.overflow = 'auto';
     }
