@@ -669,7 +669,37 @@ function createBottomSafeZone() {
   document.body.appendChild(safeZone);
 }
 
-// Enhanced iframe configuration with anti-ad protection AND source detection
+// Simple prefill configuration
+function configure() {
+  const iframe = document.getElementById("ALCOAC23CTTN");
+  
+  function appendQueryParams(url, params) {
+    let urlObj = new URL(url);
+    const searchParams = new URLSearchParams(urlObj.search);
+    for (const key in params) {
+      if (!params.hasOwnProperty(key)) continue;
+      searchParams.append(key, params[key]);
+    }
+    urlObj.search = searchParams.toString();
+    return urlObj.toString();
+  }
+  
+  function getParamsFromURL() {
+    const searchParams = new URLSearchParams(window.location.search);
+    const params = {};
+    const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
+    for (const key of keys) {
+      if (!searchParams.has(key)) continue;
+      params[key] = searchParams.get(key);
+    }
+    return params;
+  }
+  
+  const params = getParamsFromURL();
+  iframe.src = appendQueryParams(iframe.src, params);
+}
+
+// Enhanced iframe configuration with anti-ad protection
 function configureWithAdProtection() {
   const iframe = document.getElementById("ALCOAC23CTTN");
   
@@ -690,57 +720,8 @@ function configureWithAdProtection() {
   
   console.log('PWA Detected source:', source, 'URL:', sourceUrl);
   
-  // STORE source info for thank you page
-  sessionStorage.setItem('trackstat_source', source);
-  sessionStorage.setItem('trackstat_source_url', sourceUrl);
-  
-function appendQueryParams(url, params) {
-  const urlObj = new URL(url);
-  const searchParams = new URLSearchParams(urlObj.search);
-  for (const key in params) {
-    if (!params.hasOwnProperty(key)) continue;
-    searchParams.set(key, params[key]); // ✅ Changed append to set
-  }
-  urlObj.search = searchParams.toString();
-  return urlObj.toString();
-}
-  
-  function getParamsFromURL() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const params = {};
-    const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
-    for (const key of keys) {
-      if (!searchParams.has(key)) continue;
-      params[key] = searchParams.get(key);
-    }
-    
-    // ADD SOURCE INFO to parameters passed to TrackStat
-    params['source_origin'] = source;
-    params['source_url_origin'] = sourceUrl;
-    
-    return params;
-  }
-  
-  const params = getParamsFromURL();
-  
-// STORE contact details for thank you page
-if (Object.keys(params).length > 0) {
-    const contactDetails = {};
-    const contactKeys = ["first_name", "last_name", "email", "phone", "birth_date"];
-    for (const key of contactKeys) {
-        if (params[key]) {
-            contactDetails[key] = params[key];
-        }
-    }
-    
-    if (Object.keys(contactDetails).length > 0) {
-        sessionStorage.setItem('trackstat_contact_details', JSON.stringify(contactDetails));
-        console.log('PWA Stored contact details:', contactDetails); // ✅ Added logging
-    }
-}
-  
-  // Send initial tracking (form viewed) - PWA specific
-  if (Object.keys(params).length > 0 || source !== 'unknown') {
+  // Simple tracking (form viewed) - PWA specific without manual data
+  if (source !== 'unknown') {
       fetch('https://services.leadconnectorhq.com/hooks/QOxAQzWYPxtKuZsAaWqa/webhook-trigger/ee502943-14b2-4cc1-8b33-307ab6f630e6', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -749,7 +730,6 @@ if (Object.keys(params).length > 0) {
               action: 'viewed_scheduling_page',
               source: source,
               source_url: sourceUrl,
-              contact: Object.keys(params).length > 0 ? params : {},
               page: window.location.href,
               referrer: document.referrer,
               timestamp: new Date().toISOString(),
@@ -758,43 +738,8 @@ if (Object.keys(params).length > 0) {
       }).catch(err => console.log('PWA Tracking error:', err));
   }
   
- // Check if we have contact parameters for prefill logic
-if (Object.keys(params).length === 0) {
-    console.log('PWA: No contact parameters, skipping prefill logic');
-    // Still update iframe with source parameters
-    iframe.src = iframe.src + (iframe.src.includes('?') ? '&' : '?') + 
-                 'source_origin=' + encodeURIComponent(source) + 
-                 '&source_url_origin=' + encodeURIComponent(sourceUrl);
-    console.log('PWA Updated iframe URL (source only):', iframe.src);
-} else {
-    console.log('PWA: Found contact parameters, running prefill logic');
-    
-    // Give auto-prefill time to work
-    setTimeout(function() {
-      
-      // Check if auto-prefill already worked (parameters in iframe URL)
-      const iframeUrl = new URL(iframe.src);
-      const iframeParams = new URLSearchParams(iframeUrl.search);
-      
-      let autoPrefillWorked = false;
-      const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
-      for (const key of keys) {
-        if (iframeParams.has(key)) {
-          autoPrefillWorked = true;
-          break;
-        }
-      }
-      
-      // If auto-prefill didn't work, run our script
-      if (!autoPrefillWorked) {
-        iframe.src = appendQueryParams(iframe.src, params);
-        console.log('PWA: Auto-prefill failed, updated iframe URL:', iframe.src);
-      } else {
-        console.log('PWA: Auto-prefill worked, no manual intervention needed');
-      }
-      
-    }, 2000); // Wait 2 seconds for auto-prefill
-}
+  // Run prefill configuration
+  configure();
   
   let loadingHidden = false;
   
@@ -1079,13 +1024,13 @@ function initializeEnhancedPWA() {
   
   createBottomSafeZone();
   createScrollHelper();
-  configureWithAdProtection(); // Now includes source detection
+  configureWithAdProtection();
   enhancedIOSInstall();
   enhancedAndroidInstall();
   setupAutoScrollHelp();
   fixMobileHeightWithScrolling();
   
-  console.log('Enhanced PWA with scrolling ad protection and source detection initialized');
+  console.log('Enhanced PWA with scrolling ad protection initialized');
 }
 
 // SINGLE INITIALIZATION - No conflicts
