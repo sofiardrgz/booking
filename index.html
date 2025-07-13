@@ -1,22 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Alcoa Chiropractic & Wellness Center Booking App</title>
-
-  <!-- favicon -->
-  <link rel="icon" href="/icons/icon-192.png" type="image/png">
-
-  <!-- PWA manifest -->
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#115ac9" />
-  
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    /* Base & Layout - improved mobile height handling */
- html, body {
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -92,8 +74,7 @@
   border-radius: 12px 12px 0 0;
 }
 
-
-  .overlay-logo {
+.overlay-logo {
   position: absolute;
   top: 20px;
   left: 50%;
@@ -102,6 +83,13 @@
   height: auto;
   z-index: 21;
   pointer-events: none;
+  font-weight: 700;
+  color: #115ac9;
+  font-size: 18px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #ALCOAC23CTTN {
@@ -125,7 +113,7 @@
   box-sizing: border-box;
 }
     
- /* Loading overlay */
+ /* Loading overlay - FIXED */
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -140,6 +128,7 @@
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   z-index: 10;
+  transition: opacity 0.3s ease;
 }
 
 .loading-spinner {
@@ -155,8 +144,32 @@
   to { transform: rotate(360deg); } 
 }
 
+/* ✅ FIXED: Better loading state management */
 .iframe-loaded .loading-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.iframe-loaded .loading-overlay.hidden {
   display: none;
+}
+
+/* Error state */
+.iframe-error .loading-overlay {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.iframe-error .loading-spinner {
+  display: none;
+}
+
+.iframe-error .loading-overlay::after {
+  content: "Loading booking form...\A\AFalls etwas nicht lädt, versuchen Sie es in einem anderen Browser.";
+  white-space: pre;
+  color: white;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 /* Install buttons - centered positioning */
@@ -347,6 +360,21 @@
   cursor: pointer;
   margin-top: 12px;
 }
+
+/* Debug info */
+.debug-info {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 2000;
+  display: none;
+}
+
 /* ✅ FIXED: Mobile optimizations with enhanced scrolling */
 @media screen and (max-width: 480px) {
   html, body {
@@ -368,6 +396,7 @@
   .overlay-logo {
     width: 130px;
     top: 15px;
+    font-size: 14px;
   }
   
   .iframe-wrapper {
@@ -412,6 +441,7 @@
   .overlay-logo {
     width: 110px;
     top: 12px;
+    font-size: 12px;
   }
   
   .iframe-wrapper {
@@ -448,6 +478,7 @@
   .overlay-logo {
     width: 100px;
     top: 8px;
+    font-size: 11px;
   }
   
   .iframe-wrapper {
@@ -538,6 +569,9 @@ html {
   </style>
 </head>
 <body>
+  <!-- Debug info -->
+  <div class="debug-info" id="debugInfo">Loading...</div>
+
   <!-- Install App buttons -->
   <button id="androidInstallBtn">
     Install App (1 Tap!)
@@ -551,10 +585,11 @@ html {
   <div class="ghl-container">
     <div class="iframe-container">
       <div class="iframe-wrapper">
-        
+        <div class="overlay-bar"></div>
+        <div class="overlay-logo">Alcoa Chiropractic & Wellness</div>
 
         <!-- Loading spinner -->
-        <div class="loading-overlay">
+        <div class="loading-overlay" id="loadingOverlay">
           <div class="loading-spinner"></div>
         </div>
         
