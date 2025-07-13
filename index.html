@@ -669,42 +669,38 @@ function createBottomSafeZone() {
   document.body.appendChild(safeZone);
 }
 
-// Simple prefill configuration
-function configure() {
-  const iframe = document.getElementById("ALCOAC23CTTN");
-  
-  function appendQueryParams(url, params) {
-    let urlObj = new URL(url);
-    const searchParams = new URLSearchParams(urlObj.search);
-    for (const key in params) {
-      if (!params.hasOwnProperty(key)) continue;
-      searchParams.append(key, params[key]);
-    }
-    urlObj.search = searchParams.toString();
-    return urlObj.toString();
-  }
-  
-  function getParamsFromURL() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const params = {};
-    const keys = ["first_name", "last_name", "email", "phone", "birth_date"];
-    for (const key of keys) {
-      if (!searchParams.has(key)) continue;
-      params[key] = searchParams.get(key);
-    }
-    return params;
-  }
-  
-  const params = getParamsFromURL();
-  iframe.src = appendQueryParams(iframe.src, params);
-}
-
-// Simple iframe configuration with ad protection only (NO TRACKING)
+// Simple iframe configuration with ad protection + source detection (NO WEBHOOKS)
 function configureWithAdProtection() {
   const iframe = document.getElementById("ALCOAC23CTTN");
   
+  // DETECT SOURCE - We need this to pass to TrackStat
+  let source = 'unknown';
+  let sourceUrl = '';
+  
+  const currentHostname = window.location.hostname;
+  const currentUrl = window.location.href;
+  
+  if (currentHostname.includes('alcoachiropractic.com') && currentUrl.includes('/book-appointment')) {
+      source = 'ghl_funnel';
+      sourceUrl = 'alcoachiropractic.com/book-appointment';
+  } else if (currentHostname.includes('booking.alcoachiropractic.com')) {
+      source = 'pwa_qr_code';
+      sourceUrl = 'booking.alcoachiropractic.com';
+  }
+  
+  console.log('PWA Detected source:', source, 'URL:', sourceUrl);
+  
   // Run prefill configuration
   configure();
+  
+  // Pass source info to TrackStat iframe
+  setTimeout(() => {
+    if (iframe && iframe.src && source !== 'unknown') {
+      const separator = iframe.src.includes('?') ? '&' : '?';
+      iframe.src += separator + 'source_origin=' + encodeURIComponent(source) + '&source_url_origin=' + encodeURIComponent(sourceUrl);
+      console.log('Source info passed to TrackStat iframe:', source, sourceUrl);
+    }
+  }, 100);
   
   let loadingHidden = false;
   
