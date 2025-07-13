@@ -699,44 +699,9 @@ function configure() {
   iframe.src = appendQueryParams(iframe.src, params);
 }
 
-// Enhanced iframe configuration with anti-ad protection
+// Simple iframe configuration with ad protection only (NO TRACKING)
 function configureWithAdProtection() {
   const iframe = document.getElementById("ALCOAC23CTTN");
-  
-  // DETECT SOURCE - Where is this embedded?
-  let source = 'unknown';
-  let sourceUrl = '';
-  
-  const currentHostname = window.location.hostname;
-  const currentUrl = window.location.href;
-  
-  if (currentHostname.includes('alcoachiropractic.com') && currentUrl.includes('/book-appointment')) {
-      source = 'ghl_funnel';
-      sourceUrl = 'alcoachiropractic.com/book-appointment';
-  } else if (currentHostname.includes('booking.alcoachiropractic.com')) {
-      source = 'pwa_qr_code';
-      sourceUrl = 'booking.alcoachiropractic.com';
-  }
-  
-  console.log('PWA Detected source:', source, 'URL:', sourceUrl);
-  
-  // Simple tracking (form viewed) - PWA specific without manual data
-  if (source !== 'unknown') {
-      fetch('https://services.leadconnectorhq.com/hooks/QOxAQzWYPxtKuZsAaWqa/webhook-trigger/ee502943-14b2-4cc1-8b33-307ab6f630e6', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-              event: 'form_viewed',
-              action: 'viewed_scheduling_page',
-              source: source,
-              source_url: sourceUrl,
-              page: window.location.href,
-              referrer: document.referrer,
-              timestamp: new Date().toISOString(),
-              platform: 'pwa'
-          })
-      }).catch(err => console.log('PWA Tracking error:', err));
-  }
   
   // Run prefill configuration
   configure();
