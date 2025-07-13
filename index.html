@@ -669,38 +669,16 @@ function createBottomSafeZone() {
   document.body.appendChild(safeZone);
 }
 
-// Simple iframe configuration with ad protection + source detection (NO WEBHOOKS)
 function configureWithAdProtection() {
   const iframe = document.getElementById("ALCOAC23CTTN");
   
-  // DETECT SOURCE - We need this to pass to TrackStat
-  let source = 'unknown';
-  let sourceUrl = '';
-  
-  const currentHostname = window.location.hostname;
-  const currentUrl = window.location.href;
-  
-  if (currentHostname.includes('alcoachiropractic.com') && currentUrl.includes('/book-appointment')) {
-      source = 'ghl_funnel';
-      sourceUrl = 'alcoachiropractic.com/book-appointment';
-  } else if (currentHostname.includes('booking.alcoachiropractic.com')) {
-      source = 'pwa_qr_code';
-      sourceUrl = 'booking.alcoachiropractic.com';
-  }
-  
-  console.log('PWA Detected source:', source, 'URL:', sourceUrl);
-  
-  // Run prefill configuration
+  // Run prefill first
   configure();
   
-  // Pass source info to TrackStat iframe
-  setTimeout(() => {
-    if (iframe && iframe.src && source !== 'unknown') {
-      const separator = iframe.src.includes('?') ? '&' : '?';
-      iframe.src += separator + 'source_origin=' + encodeURIComponent(source) + '&source_url_origin=' + encodeURIComponent(sourceUrl);
-      console.log('Source info passed to TrackStat iframe:', source, sourceUrl);
-    }
-  }, 100);
+  // IMMEDIATELY add QR source to iframe URL
+  const originalSrc = iframe.src;
+  const separator = originalSrc.includes('?') ? '&' : '?';
+  iframe.src = originalSrc + separator + 'source_origin=pwa_qr_code&source_url_origin=booking.alcoachiropractic.com';
   
   let loadingHidden = false;
   
@@ -708,7 +686,6 @@ function configureWithAdProtection() {
     if (!loadingHidden) {
       document.querySelector('.iframe-container').classList.add('iframe-loaded');
       loadingHidden = true;
-      console.log('Iframe loaded successfully');
     }
   }
   
@@ -718,19 +695,15 @@ function configureWithAdProtection() {
     try {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       if (iframeDoc && iframeDoc.body) {
-        // Basic styling
         iframeDoc.body.style.margin = '0';
         iframeDoc.body.style.padding = '0';
         iframeDoc.body.style.overflow = 'auto';
         iframeDoc.documentElement.style.overflow = 'auto';
-        
-        // ANTI-AD PROTECTION: Add bottom padding
         iframeDoc.body.style.paddingBottom = '300px';
         iframeDoc.documentElement.style.paddingBottom = '250px';
         iframeDoc.documentElement.style.scrollBehavior = 'smooth';
         iframeDoc.body.style.webkitOverflowScrolling = 'touch';
         
-        // Find and protect submit buttons
         const submitButtons = iframeDoc.querySelectorAll(
           'input[type="submit"], button[type="submit"], .submit-btn, .submit-button, ' +
           '.book-appointment, .schedule-btn, button[onclick*="submit"], button[onclick*="book"], ' +
@@ -750,11 +723,8 @@ function configureWithAdProtection() {
               btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 100);
           });
-          
-          console.log(`Protected submit button ${index + 1}:`, btn);
         });
         
-        // Add protective div at bottom
         const protectiveDiv = iframeDoc.createElement('div');
         protectiveDiv.style.height = '300px';
         protectiveDiv.style.width = '100%';
@@ -765,11 +735,8 @@ function configureWithAdProtection() {
         iframeDoc.addEventListener('scroll', () => {
           window.dispatchEvent(new Event('scroll'));
         });
-        
-        console.log('Enhanced scrolling protection applied to iframe');
       }
     } catch (e) {
-      console.log('Cross-origin iframe - applying external protection');
       iframe.style.marginBottom = '300px';
       iframe.style.paddingBottom = '250px';
       iframe.setAttribute('scrolling', 'yes');
@@ -783,7 +750,6 @@ function configureWithAdProtection() {
   };
   
   iframe.onerror = function() {
-    console.log('Iframe failed to load');
     hideLoader();
   };
   
