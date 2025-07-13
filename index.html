@@ -1,4 +1,22 @@
-html, body {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Alcoa Chiropractic & Wellness Center Booking App</title>
+
+  <!-- favicon -->
+  <link rel="icon" href="/icons/icon-192.png" type="image/png">
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#115ac9" />
+  
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base & Layout - improved mobile height handling */
+ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -640,6 +658,19 @@ html {
   </div>
 
    <script>
+// Debug function
+function debug(message) {
+  console.log('[PWA Debug]', message);
+  const debugElement = document.getElementById('debugInfo');
+  if (debugElement) {
+    debugElement.textContent = message;
+    debugElement.style.display = 'block';
+    setTimeout(() => {
+      debugElement.style.display = 'none';
+    }, 3000);
+  }
+}
+
 // Service worker for PWA
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(err => {
@@ -704,32 +735,78 @@ function createBottomSafeZone() {
   document.body.appendChild(safeZone);
 }
 
+// Enhanced iframe loading with better error handling
 function configureWithAdProtection() {
+  debug('Starting iframe configuration...');
+  
   const iframe = document.getElementById("ALCOAC23CTTN");
-  
-  // Run prefill first
-  configure();
-  
-  // IMMEDIATELY add QR source to iframe URL
-  const originalSrc = iframe.src;
-  const separator = originalSrc.includes('?') ? '&' : '?';
-  iframe.src = originalSrc + separator + 'source_origin=pwa_qr_code&source_url_origin=booking.alcoachiropractic.com';
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const iframeContainer = document.querySelector('.iframe-container');
   
   let loadingHidden = false;
+  let loadAttempts = 0;
+  const maxAttempts = 3;
   
-  function hideLoader() {
+  function hideLoader(reason = 'unknown') {
     if (!loadingHidden) {
-      document.querySelector('.iframe-container').classList.add('iframe-loaded');
+      debug(`Hiding loader: ${reason}`);
+      iframeContainer.classList.add('iframe-loaded');
+      
+      // Add a slight delay before completely hiding
+      setTimeout(() => {
+        loadingOverlay.classList.add('hidden');
+      }, 500);
+      
       loadingHidden = true;
     }
   }
   
+  function showError(message) {
+    debug(`Error: ${message}`);
+    iframeContainer.classList.add('iframe-error');
+    loadingOverlay.innerHTML = `
+      <div style="text-align: center; color: white;">
+        <div style="font-size: 16px; margin-bottom: 8px;">${message}</div>
+        <div style="font-size: 14px; opacity: 0.8;">Please refresh the page or try a different browser</div>
+        <button onclick="location.reload()" style="margin-top: 12px; padding: 8px 16px; background: white; color: #115ac9; border: none; border-radius: 6px; cursor: pointer;">Refresh</button>
+      </div>
+    `;
+  }
+  
+  function retryLoad() {
+    if (loadAttempts < maxAttempts) {
+      loadAttempts++;
+      debug(`Retry attempt ${loadAttempts}/${maxAttempts}`);
+      
+      const originalSrc = iframe.src;
+      iframe.src = 'about:blank';
+      
+      setTimeout(() => {
+        const separator = originalSrc.includes('?') ? '&' : '?';
+        iframe.src = originalSrc + separator + `retry=${loadAttempts}&t=${Date.now()}`;
+      }, 1000);
+    } else {
+      showError('Failed to load booking form');
+      hideLoader('max retries reached');
+    }
+  }
+  
+  // Set initial source with tracking
+  const originalSrc = iframe.src;
+  const separator = originalSrc.includes('?') ? '&' : '?';
+  iframe.src = originalSrc + separator + 'source_origin=pwa_qr_code&source_url_origin=booking.alcoachiropractic.com';
+  
+  // Set up event handlers
   iframe.onload = function() {
-    hideLoader();
+    debug('Iframe loaded successfully');
+    hideLoader('iframe onload');
     
     try {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       if (iframeDoc && iframeDoc.body) {
+        debug('Iframe document accessible, applying styles...');
+        
+        // Apply styles to iframe content
         iframeDoc.body.style.margin = '0';
         iframeDoc.body.style.padding = '0';
         iframeDoc.body.style.overflow = 'auto';
@@ -739,11 +816,14 @@ function configureWithAdProtection() {
         iframeDoc.documentElement.style.scrollBehavior = 'smooth';
         iframeDoc.body.style.webkitOverflowScrolling = 'touch';
         
+        // Style submit buttons
         const submitButtons = iframeDoc.querySelectorAll(
           'input[type="submit"], button[type="submit"], .submit-btn, .submit-button, ' +
           '.book-appointment, .schedule-btn, button[onclick*="submit"], button[onclick*="book"], ' +
           'button[onclick*="schedule"], .btn-primary, .btn-success'
         );
+        
+        debug(`Found ${submitButtons.length} submit buttons`);
         
         submitButtons.forEach((btn, index) => {
           btn.style.marginBottom = '200px';
@@ -760,6 +840,7 @@ function configureWithAdProtection() {
           });
         });
         
+        // Add protective div at bottom
         const protectiveDiv = iframeDoc.createElement('div');
         protectiveDiv.style.height = '300px';
         protectiveDiv.style.width = '100%';
@@ -767,28 +848,63 @@ function configureWithAdProtection() {
         protectiveDiv.innerHTML = '<div style="text-align:center;padding:50px;color:#999;font-size:14px;">Scroll up if you can\'t see the submit button</div>';
         iframeDoc.body.appendChild(protectiveDiv);
         
+        // Forward scroll events
         iframeDoc.addEventListener('scroll', () => {
           window.dispatchEvent(new Event('scroll'));
         });
       }
     } catch (e) {
+      debug('Cross-origin iframe, applying fallback styles...');
+      // Fallback for cross-origin iframes
       iframe.style.marginBottom = '300px';
       iframe.style.paddingBottom = '250px';
       iframe.setAttribute('scrolling', 'yes');
       iframe.style.overflow = 'auto';
     }
+  };
+  
+  iframe.onerror = function(e) {
+    debug('Iframe error event triggered');
+    retryLoad();
+  };
+  
+  // Fallback timer - always hide loader after 8 seconds
+  setTimeout(() => {
+    if (!loadingHidden) {
+      debug('Fallback timer triggered');
+      
+      // Check if iframe has any content
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.trim()) {
+          hideLoader('fallback timer - content found');
+        } else {
+          retryLoad();
+        }
+      } catch (e) {
+        // Cross-origin - assume it loaded
+        hideLoader('fallback timer - cross-origin assumed loaded');
+      }
+    }
+  }, 8000);
+  
+  // Alternative check - monitor iframe src changes
+  let lastSrc = iframe.src;
+  const srcMonitor = setInterval(() => {
+    if (iframe.src !== lastSrc && iframe.src !== 'about:blank') {
+      debug('Iframe src changed, assuming load...');
+      setTimeout(() => {
+        if (!loadingHidden) {
+          hideLoader('src change detected');
+        }
+      }, 2000);
+    }
+    lastSrc = iframe.src;
     
-    iframe.scrolling = 'yes';
-    iframe.style.overflow = 'auto';
-    iframe.style.overflowX = 'hidden';
-    iframe.style.overflowY = 'auto';
-  };
-  
-  iframe.onerror = function() {
-    hideLoader();
-  };
-  
-  setTimeout(hideLoader, 3000);
+    if (loadingHidden) {
+      clearInterval(srcMonitor);
+    }
+  }, 1000);
 }
 
 // Enhanced iOS install
@@ -978,8 +1094,25 @@ document.addEventListener('touchend', function(event) {
   lastTouchEnd = now;
 }, false);
 
+// Connection check
+function checkConnection() {
+  if (!navigator.onLine) {
+    debug('No internet connection detected');
+    return false;
+  }
+  return true;
+}
+
 // Initialize everything with enhanced protection
 function initializeEnhancedPWA() {
+  debug('Initializing PWA...');
+  
+  // Check connection first
+  if (!checkConnection()) {
+    debug('No internet connection');
+    return;
+  }
+  
   // Enable body scrolling
   document.body.style.overflow = 'auto';
   document.documentElement.style.overflow = 'auto';
@@ -992,8 +1125,20 @@ function initializeEnhancedPWA() {
   setupAutoScrollHelp();
   fixMobileHeightWithScrolling();
   
-  console.log('Enhanced PWA with scrolling ad protection initialized');
+  debug('PWA initialization complete');
 }
+
+// Monitor online/offline status
+window.addEventListener('online', () => {
+  debug('Connection restored');
+  if (document.querySelector('.iframe-container').classList.contains('iframe-error')) {
+    location.reload();
+  }
+});
+
+window.addEventListener('offline', () => {
+  debug('Connection lost');
+});
 
 // SINGLE INITIALIZATION - No conflicts
 if (document.readyState === 'complete') {
@@ -1001,6 +1146,20 @@ if (document.readyState === 'complete') {
 } else {
   window.addEventListener('load', initializeEnhancedPWA);
 }
+
+// Additional fallback for stubborn loading issues
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay && !loadingOverlay.classList.contains('hidden')) {
+      debug('DOMContentLoaded fallback triggered');
+      document.querySelector('.iframe-container').classList.add('iframe-loaded');
+      setTimeout(() => {
+        loadingOverlay.classList.add('hidden');
+      }, 500);
+    }
+  }, 10000);
+});
   </script>
 </body>
 </html>
