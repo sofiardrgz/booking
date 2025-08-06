@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Alcoa Chiropractic & Wellness Center//EN
+BEGIN:VEVENT
+UID:kbclass-{{contact.id}}@alcoachiropractic.com
+DTSTAMP:{{system.date.Ymd\THis\Z}}
+DTSTART;TZID=America/New_York:{{custom_values.kb_class_event_start}}
+DTEND;TZID=America/New_York:{{custom_values.kb_class_event_end}}
+SUMMARY:Kettlebell Health with Dr. Scott Hoar
+LOCATION:Alcoa Chiropractic & Wellness Center, 246 N Rankin Rd, Alcoa, TN 37701
+DESCRIPTION:A small-group, hands-on kettlebell class with Dr. Scott Hoar. Wear comfortable clothes, bring water, and be ready for an energizing, low-impact, high-reward workout. Limited to 10 participants. Your spot is confirmed once payment is complete. 
+If you haven’t yet secured your spot, complete your payment here: https://alcoachiropractic.com/kettlebell-checkout
+END:VEVENT
+END:VCALENDAR
